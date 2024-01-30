@@ -1,38 +1,37 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from .models import Menu, booking
+from .models import Menu, Booking
 from rest_framework import viewsets, permissions
-from .serializer import UserSerializer, MenuItemSerializer, BookingSerializer
+from .serializer import UserSerializer, MenuSerializer, BookingSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [permissions.AllowAny]
-    extra_actions = ['list']
+    permission_classes = [permissions.IsAdminUser]
+    extra_actions = ['create','list', 'retrieve', 'update', 'destroy']
 
 class CreateUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAdminUser]
     extra_actions = ['create']
 
 
-class MenuItemsViewSet(viewsets.ModelViewSet):
+class MenuViewSet(viewsets.ModelViewSet):
     queryset = Menu.objects.all()
-    serializer_class = MenuItemSerializer
+    serializer_class = MenuSerializer
+    permission_classes = [permissions.AllowAny]
     extra_actions = ['create', 'list']
 
-class SingleMenuItemViewSet(viewsets.ModelViewSet):
+class SingleMenuViewSet(viewsets.ModelViewSet):
     queryset = Menu.objects.all()
-    serializer_class = MenuItemSerializer
+    serializer_class = MenuSerializer
     extra_actions = ['retrieve', 'update', 'destroy']
+    permission_classes = [permissions.AllowAny]
 
 class BookingViewSet(viewsets.ModelViewSet):
-    queryset = booking.objects.all()
+    queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     extra_actions = ['create', 'list', 'update', 'destroy']
+    permission_classes = [permissions.IsAuthenticated]
 

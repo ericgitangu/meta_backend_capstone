@@ -13,18 +13,18 @@ class User(viewsets.ViewSet):
         return super().__str__()
 
 class Menu(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.CharField(max_length=200)
+    title = models.CharField(max_length=255, null=False, blank=False, default='')
+    inventory = models.SmallIntegerField(default=0)
     price = models.DecimalField(max_digits=5, decimal_places=2)
 
     class Meta:
-        ordering = ['name']
+        ordering = ['title', 'inventory', 'price']
         verbose_name_plural = 'Menu'
 
-    def __str__(self):
-        return self.name
+    def get_item(self):
+        return f'{self.title} : {str(self.price)}'
 
-class booking(models.Model):
+class Booking(models.Model):
     name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)
     email = models.EmailField()
@@ -34,7 +34,7 @@ class booking(models.Model):
 
     class Meta:
         ordering = ['date', 'time']
-        verbose_name_plural = 'bookings'
+        verbose_name_plural = 'Bookings'
 
     def __str__(self):
-        return self.name
+        return f'{self.name} : {self.date} - {self.time}'
