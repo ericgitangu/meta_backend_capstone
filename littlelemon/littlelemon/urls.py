@@ -22,16 +22,14 @@ from rest_framework.authtoken.views import obtain_auth_token
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
-router.register(r'tables', views.BookingViewSet)
-router.register(r'menu', views.MenuViewSet)
-router.register(r'accounts', views.UserViewSet)
+router.register(r'booking/tables', views.BookingViewSet)
+router.register(r'menu-items', views.MenuViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
-    path('restaurant/booking/', include(router.urls)),
+    path('restaurant/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
-    path('accounts/profile/', include('rest_framework.urls')),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
     path('api-token-auth/', obtain_auth_token)
