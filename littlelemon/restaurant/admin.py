@@ -15,9 +15,9 @@ class MenuAdmin(admin.ModelAdmin):
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     search_fields = ['name', 'phone', 'email']
-    list_filter = ['date', 'time']
+    list_filter = ['reservation_date', 'reservation_slot']
     list_per_page = 10
-    list_display = ['name', 'phone', 'email', 'date', 'time', 'party_size']
-    list_editable = ['party_size']
+    list_display = ['name', 'phone', 'email', 'reservation_date', 'reservation_slot']
+    list_editable = ['reservation_date', 'reservation_slot']
     list_display_links = ['name', 'phone', 'email']
-    ordering = ['date', 'time']
+    ordering = ['reservation_date', 'reservation_slot']

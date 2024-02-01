@@ -4,8 +4,9 @@ from django.db import models
 from rest_framework import viewsets
 
 class User(viewsets.ViewSet):
-    url = models.CharField(max_length=200)
-    username = models.CharField(max_length=100)
+    url = models.CharField(max_length=255)
+    username = models.CharField(max_length=255)
+    password = models.CharField(max_length=255) 
     email = models.EmailField()
     groups = models.ManyToManyField('api_auth.Group')
 
@@ -16,6 +17,7 @@ class Menu(models.Model):
     title = models.CharField(max_length=255, null=False, blank=False, default='')
     inventory = models.SmallIntegerField(default=0)
     price = models.DecimalField(max_digits=5, decimal_places=2)
+    description = models.TextField(null=True, blank=True)
 
     class Meta:
         ordering = ['title', 'inventory', 'price']
@@ -25,16 +27,15 @@ class Menu(models.Model):
         return f'{self.title} : {str(self.price)}'
 
 class Booking(models.Model):
-    name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=20)
+    name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=10)
     email = models.EmailField()
-    date = models.DateField()
-    time = models.TimeField()
-    party_size = models.IntegerField()
+    reservation_date = models.DateField()
+    reservation_slot = models.TimeField()
 
     class Meta:
-        ordering = ['date', 'time']
+        ordering = ['reservation_date', 'reservation_slot']
         verbose_name_plural = 'Bookings'
 
     def __str__(self):
-        return f'{self.name} : {self.date} - {self.time}'
+        return f'{self.name} : {self.reservation_date} - {self.reservation_slot}'

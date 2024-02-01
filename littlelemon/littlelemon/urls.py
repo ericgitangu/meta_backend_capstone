@@ -23,10 +23,10 @@ from rest_framework.authtoken.views import obtain_auth_token
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'booking/tables', views.BookingViewSet)
-router.register(r'menu-items', views.MenuViewSet)
+router.register(r'menu', views.MenuViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', include('restaurant.urls')),
     path('admin/', admin.site.urls),
     path('restaurant/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
