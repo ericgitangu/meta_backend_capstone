@@ -39,3 +39,4 @@ class Booking(models.Model):
 
     def __str__(self):
         return f'{self.name} : {self.reservation_date} - {self.reservation_slot}'
+

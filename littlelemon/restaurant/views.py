@@ -24,6 +24,9 @@ from .forms import BookingForm
 import json
 from datetime import datetime
 from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -36,8 +39,8 @@ class UserViewSet(viewsets.ModelViewSet):
 class MenuViewSet(viewsets.ModelViewSet):
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
-    permission_classes = [permissions.AllowAny]
-    extra_actions = ['create', 'list', 'retrieve', 'update', 'destroy']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    extra_actions = ['list']
 
 
 class BookingViewSet(viewsets.ModelViewSet):
@@ -45,7 +48,15 @@ class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     extra_actions = ['create', 'list', 'update', 'destroy']
     permission_classes = [permissions.IsAuthenticated]
-
+    
+class ProfileView(View):
+    @method_decorator(login_required, name='dispatch')
+    def get(self, request):
+        user = request.user
+        # Retrieve the user profile based on your implementation
+        
+        profile = User.objects.get(username=user.username)
+        return render(request, 'profile.html', {"profile": profile})
 
 class HomeView(View):
     def get(self, request):
@@ -71,11 +82,14 @@ class BookView(View):
         return render(request, 'book.html', context)
 
     def post(self, request):
-        form = BookingForm(request.POST)
-        if form.is_valid():
-            form.save()
-        context = {'form': form}
-        return render(request, 'book.html', context)
+        if request.user.is_superuser:
+            form = BookingForm(request.POST)
+            if form.is_valid():
+                form.save()
+            context = {'form': form}
+            return render(request, 'book.html', context)
+        else:
+            return JsonResponse({'error': 'Only admin users can perform this action'}, status=HttpResponseForbidden.status_code)
 
 
 class MenuView(View):
