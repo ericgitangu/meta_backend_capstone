@@ -14,6 +14,12 @@ from rest_framework.authtoken.models import Token
 import requests
 
 class MenuViewTest(TestCase):
+    """
+    Test case for the MenuView class.
+
+    This test case includes setup and teardown methods, as well as a test method for the `getall` endpoint.
+    """
+
     def create_bearer_token(username, password):
         data = {
             'username': username,
@@ -24,18 +30,18 @@ class MenuViewTest(TestCase):
         token = serializer.save()
         return token.key
 
-    class MenuViewTest(TestCase):
-        def setUp(self):
-            self.client = APIClient()
-            self.menu1 = Menu.objects.create(title='Menu 1', price=10.99, inventory=10)
-            self.menu2 = Menu.objects.create(title='Menu 2', price=15.99, inventory=20)
-            self.menu3 = Menu.objects.create(title='Menu 3', price=12.99, inventory=30)
+    def setUp(self):
+        print("\n----Test Setup for the getall endpoint----")
+        self.client = APIClient()
+        self.menu1 = Menu.objects.create(title='Menu 1', price=10.99, inventory=10)
+        self.menu2 = Menu.objects.create(title='Menu 2', price=15.99, inventory=20)
+        self.menu3 = Menu.objects.create(title='Menu 3', price=12.99, inventory=30)
+        print('\tSetup complete ✅')
 
-        def tearDown(self):
-            Menu.objects.all().delete()
-
-        def tearDown(self):
-            Menu.objects.all().delete()
+    def tearDown(self):
+        print("----Test Teardown----")
+        Menu.objects.all().delete()
+        print('\tTeardown complete ✅')
 
     def test_getall(self):
         url = reverse('menu-list')
@@ -45,9 +51,14 @@ class MenuViewTest(TestCase):
             'Content-Type': 'application/json'
         }
         response = self.client.get(url, headers=headers)
-        print(url)
         menus = Menu.objects.all()
+        # print(menus)
         serialized_data = MenuSerializer(menus, many=True).data
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serialized_data)
+        print('----Assert Status codes----')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, msg="Status code is not 200")
+        print('\tPassed Status Codes assertion ✅')
+        # print(response.data['results'])
+        print('----Assert Response Data----')
+        self.assertEqual(response.data['results'], serialized_data)
+        print('\tPassed Response Data assertion ✅')
 

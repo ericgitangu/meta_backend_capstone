@@ -12,3 +12,10 @@
     <p>Is Superuser: {{ profile.is_superuser }}</p>
     <p>Last login: {{ profile.last_login }}</p>
 {% endblock %}
+
+<script>
+    setTimeout(function() {
+        alert("You have successfully logged in!");
+        window.location.href = {% url 'book' %};
+    }, 3000);
+</script>

@@ -9,5 +9,10 @@
     <li><a href="{% url 'menu' %}">Menu</a></li>
     <li><a href="{% url 'book' %}">Book</a></li>
     <li><a href="{% url 'reservations' %}">Reservations</a></li>
+    {% if user.is_authenticated %}
+      <li><a href="{% url 'signout' %}">Logout</a></li>
+    {% else %}
+      <li><a href="{% url 'login' %}">Login</a></li>
+    {% endif %}
   </ul>
 </nav>

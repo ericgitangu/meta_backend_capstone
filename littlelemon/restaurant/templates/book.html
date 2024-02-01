@@ -1,6 +1,5 @@
-{% extends 'base.html' %}
-{% load static %}
-
+{% extends 'base.html' %} 
+{% load static %} 
 {% block content %}
 <section>
   <article>
@@ -9,34 +8,51 @@
     <div class="row">
       <!--Begin col-->
       <div class="column">
+        <form method="POST" id="form" action="/restaurant/accounts/login/">
           {% csrf_token %}
-          <form method="POST" id="form">
-            <!-- {% csrf_token %} -->
-            <p>
-              <label for="name">Name:</label>
-              <input type="text" placeholder="Your Name" maxlength="255" required id="name">
-            </p>
-            <p>
-              <label for="phone">Phone:</label>
-              <input type="text" placeholder="Your Phone Number" maxlength="10" required id="phone">
-            </p>
-            <p>
-              <label for="email">Email:</label>
-              <input type="text" placeholder="Your Name" maxlength="200" required id="email">
-            </p>
-            <p>
+          <p>
+            <label for="name">Name:</label>
+            <input
+              type="text"
+              placeholder="Your Name"
+              maxlength="255"
+              required
+              id="name"
+            />
+          </p>
+          <p>
+            <label for="phone">Phone:</label>
+            <input
+              type="text"
+              placeholder="Your Phone Number"
+              maxlength="10"
+              required
+              id="phone"
+            />
+          </p>
+          <p>
+            <label for="email">Email:</label>
+            <input
+              type="text"
+              placeholder="Your Name"
+              maxlength="200"
+              required
+              id="email"
+            />
+          </p>
+          <p>
             <!-- Step 9: Part one -->
-              <label for="reservation_date">Reservation date:</label>
-              <input type="date" required="" id="reservation_date">
-            </p>
-      
-            <p>
-              <label for="reservation_slot">Reservation time:</label>
-              <select id="reservation_slot">
-                <option value="0" disabled>Select time</option>
-              </select>
-            </p>
-            <button type="button" id="button">Reserve</button>
+            <label for="reservation_date">Reservation date:</label>
+            <input type="date" required="" id="reservation_date" />
+          </p>
+
+          <p>
+            <label for="reservation_slot">Reservation time:</label>
+            <select id="reservation_slot">
+              <option value="0" disabled>Select time</option>
+            </select>
+          </p>
+          <button type="button" id="button">Reserve</button>
         </form>
       </div>
       <!--End col-->
@@ -44,8 +60,7 @@
       <!--Begin col-->
       <div class="column">
         <h2>Bookings For <span id="today"></span></h2>
-        <div id="bookings">
-        </div>
+        <div id="bookings"></div>
       </div>
       <!--End col-->
     </div>
@@ -53,76 +68,92 @@
   </article>
 </section>
 <script>
-
-  const date = new Date()
-  document.getElementById('reservation_date').value = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate().toString().padStart(2, "0")}`
-  getBookings()
+  date = new Date()
+  const url = "http://localhost:8000/restaurant/booking/tables/";
+  document.getElementById('reservation_date').value = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, "0")}`;
+  getBookings();
 
 
   /*  Step 10: Part two */
-  reservation_date = document.getElementById('reservation_date').addEventListener("change", getBookings)
+  reservation_date = document.getElementById('reservation_date')
+  reservation_date.addEventListener('change', function () {
+    getBookings();
+  });
 
   function getBookings() {
-    let reserved_slots = [];
-    const date = document.getElementById('reservation_date').value;
+    reserved_slots = [];
+    date = reservation_date.value;
+    console.log(date);
+    reservation_slot = document.getElementById('reservation_slot');
     document.getElementById('today').innerHTML = date;
 
-    fetch("{% url 'bookings' %}" + '?date=' + date)
+    fetch(url)
       .then(r => r.json())
       .then(data => {
-        reserved_slots = []
-        bookings = ''
-        
+        reserved_slots = [];
+        bookings = '';
+        console.log(data['results'])
         /* Step 11: Part three */
-        for (let i = 0; i < data.length; i++) {
-          item = data[i];
-          console.log(item.fields)
-          reserved_slots.push(item.fields.reservation_slot)
-          bookings += `<p>${item.fields.name} - ${formatTime(item.fields.reservation_slot)}</p>`
-        }
-
-        /* Step 12: Part four  */
-        slot_options = `<option value="0" disabled>Select time</option>`
-        for (let i = 10; i <= 20; i++) {
-          label = formatTime(i)
-          if (reserved_slots.includes(i) == true) {
-            slot_options += `<option value=${i} disabled>${label}</option>`
-            reservation_slot.value = i + 1
-          } else {
-            slot_options += `<option value=${i}>${label}</option>`
+        for(let item of data['results']) {
+          if (item.reservation_date == date) {
+            reserved_slots.push(item.reservation_slot);
+            bookings +=  `<p>${item.name} - ${formatTime(item.reservation_slot)}</p>`;
           }
         }
 
-        document.getElementById('reservation_slot').innerHTML = slot_options
-        if (bookings == '') {
-          bookings = "No bookings"
+        /* Step 12: Part four  */
+        slot_options = `<option value="0" disabled>Select time</option>`;
+        for (let i = 10; i <= 20; i++) {
+          label = formatTime(i);
+          if (reserved_slots.includes(i+':00:00') == true) {
+            slot_options += `<option value=${i} disabled>${label}</option>`;
+            reservation_slot.value = i + 1;
+          } else {
+            slot_options += `<option value=${i}>${label}</option>`;
+          }
         }
-        
-        document.getElementById('bookings').innerHTML = bookings
-      })
+
+        reservation_slot.innerHTML = slot_options;
+        if (bookings == '') {
+          bookings = "No bookings";
+        }
+
+        document.getElementById('bookings').innerHTML = bookings;
+      });
   }
 
   function formatTime(time) {
-    const ampm = time < 12 ? 'AM' : 'PM'
-    const t = time < 12 ? time : time > 12 ? time - 12 : time
-    const label = `${t} ${ampm}`
-    return label
+    const ampm = time < 12 ? 'AM' : 'PM';
+    const t = time < 12 ? time : time > 12 ? time - 12 : time;
+    const label = `${t} ${ampm}`;
+    return label;
   }
 
 
   document.getElementById('button').addEventListener('click', function (e) {
+    e.preventDefault();
     const formdata = {
       name: document.getElementById('name').value,
+      phone: document.getElementById('phone').value,
+      email: document.getElementById('email').value,
       reservation_date: document.getElementById('reservation_date').value,
       reservation_slot: document.getElementById('reservation_slot').value,
-    }
+    };
 
-    fetch("{% url 'bookings' %}", { method: 'post', body: JSON.stringify(formdata) })
-      .then(r => r.text())
+    fetch(url, {
+       method: 'POST',
+       headers: { 
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+       },
+       body: JSON.stringify(formdata)
+    }).then(r => r.json())
       .then(data => {
-        getBookings()
-      })
-  })
+          console.log(data);
+          reservation_slot.value = 10;
+      }).catch(error => {
+          console.error(error);
+      });
+  });
 </script>
 {% endblock %}
-

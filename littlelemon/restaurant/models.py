@@ -8,7 +8,7 @@ class User(viewsets.ViewSet):
     username = models.CharField(max_length=255)
     password = models.CharField(max_length=255) 
     email = models.EmailField()
-    groups = models.ManyToManyField('api_auth.Group')
+    groups = models.ManyToManyField('api_auth.Group', default='')
 
     def __str__(self) -> str:
         return super().__str__()
@@ -27,9 +27,9 @@ class Menu(models.Model):
         return f'{self.title} : {str(self.price)}'
 
 class Booking(models.Model):
-    name = models.CharField(max_length=255)
-    phone = models.CharField(max_length=10)
-    email = models.EmailField()
+    name = models.CharField(max_length=255, null=False, blank=False, default='')
+    phone = models.CharField(max_length=10, null=False, blank=False, default='')
+    email = models.EmailField(null=False, blank=False, default='')
     reservation_date = models.DateField()
     reservation_slot = models.TimeField()
 
@@ -39,4 +39,3 @@ class Booking(models.Model):
 
     def __str__(self):
         return f'{self.name} : {self.reservation_date} - {self.reservation_slot}'
-

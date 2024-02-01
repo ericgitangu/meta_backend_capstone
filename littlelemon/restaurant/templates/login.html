@@ -1,27 +1,55 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<h1>Login</h1>
+
 <!--Begin col-->
-<div class="column">
-<form method="post" action='auth/users'>
+<div class="container">
+    <h1>Login</h1>
+<form method="post">
     {% csrf_token %}
 
     <div class="form-group">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" class="form-control" required>
-    </div>
+    </div><br/>
     <div class="form-group">
         <label for="email">Email:</label>
-        <input type="email" id="email" name="email" class="form-control" required>
-    </div>
+        <input type="email" id="email" name="email" class="form-control" required ><br/>
     <div class="form-group">
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" class="form-control" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Login</button>
+    </div><br/>
+    <button type="submit" class="submit">Login</button>
 </form>
+<script>
+document.querySelector('form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    let username = document.getElementById('username').value;
+    let password = document.getElementById('password').value;
+    let email = document.getElementById('email').value;
+
+    fetch('http://localhost:8000/auth/users/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            username: username,
+            password: password,
+            email: email
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Create user using the user model and save the user
+        let user = new User(username, password, email);
+        user.save();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+</script>
 </div>
 <!--End col-->
 {% endblock %}
-```

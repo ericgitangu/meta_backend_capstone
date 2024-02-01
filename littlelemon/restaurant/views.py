@@ -4,7 +4,7 @@ from .models import Menu, Booking
 from rest_framework import viewsets, permissions
 from .serializer import UserSerializer, MenuSerializer, BookingSerializer
 from django.views import View
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core import serializers
 from .forms import BookingForm
 import json
@@ -18,22 +18,29 @@ from .models import Menu, Booking
 from .serializer import UserSerializer, MenuSerializer, BookingSerializer
 from django.views import View
 from django.core import serializers
-from django.views.decorators.csrf import csrf_exempt
 from .models import Booking
 from .forms import BookingForm
 import json
 from datetime import datetime
-from django.http import JsonResponse
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponse
+
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.http import JsonResponse
+from django.shortcuts import redirect
+import requests
+from django.contrib.auth import logout
+import requests
+from django.shortcuts import render, redirect
+from django.views import View
+from django.views.decorators.csrf import csrf_protect
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAdminUser]
-    extra_actions = ['create', 'list', 'retrieve', 'update', 'destroy']
+    permission_classes = [permissions.AllowAny]
+    extra_actions = ['create']
 
 
 class MenuViewSet(viewsets.ModelViewSet):
@@ -53,11 +60,8 @@ class ProfileView(View):
     @method_decorator(login_required, name='dispatch')
     def get(self, request):
         user = request.user
-        # Retrieve the user profile based on your implementation
-        
         profile = User.objects.get(username=user.username)
-        return render(request, 'profile.html', {"profile": profile})
-
+        return render(request, 'book.html')
 class HomeView(View):
     def get(self, request):
         return render(request, 'index.html')
@@ -77,19 +81,24 @@ class ReservationsView(View):
 
 class BookView(View):
     def get(self, request):
-        form = BookingForm()
-        context = {'form': form}
-        return render(request, 'book.html', context)
+        if request.user.is_authenticated:
+            form = BookingForm()
+            context = {'form': form}
+            return render(request, 'book.html', context)
+        else:
+            base_url = request.build_absolute_uri('/')  # Get the base URL
+            login_url = f"{base_url}restaurant/accounts/login"  # Construct the login URL
+            return redirect(login_url)  # Redirect to the login URL
 
     def post(self, request):
-        if request.user.is_superuser:
+        if request.user.is_authenticated:
             form = BookingForm(request.POST)
             if form.is_valid():
                 form.save()
             context = {'form': form}
             return render(request, 'book.html', context)
         else:
-            return JsonResponse({'error': 'Only admin users can perform this action'}, status=HttpResponseForbidden.status_code)
+            return render(request=request, template_name='login.html')
 
 
 class MenuView(View):
@@ -109,30 +118,82 @@ class MenuItemView(View):
 
 
 class BookingsView(View):
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-            exist = Booking.objects.filter(reservation_date=data['reservation_date']).filter(
-                reservation_slot=data['reservation_slot']).exists()
-            if not exist:
-                booking = Booking(
-                    name=data['name'],
-                    reservation_date=data['reservation_date'],
-                    reservation_slot=data['reservation_slot'],
-                )
-                booking.save()
+    class BookingsView(View):
+        @csrf_protect
+        def post(self, request):
+            if request.user.is_authenticated:
+                print('User is authenticated!')
+                try:
+                    data = json.loads(request.body)
+                    exist = Booking.objects.filter(reservation_date=data['reservation_date']).filter(
+                        reservation_slot=data['reservation_slot']).exists()
+                    if not exist:
+                        # booking = Booking(
+                        #     name=data['name'],
+                        #     phone=data['phone'],
+                        #     email=data['email'],
+                        #     reservation_date=data['reservation_date'],
+                        #     reservation_slot=data['reservation_slot'],
+                            
+                        # )
+                        # # booking.save()
+                        
+                        base_url = request.build_absolute_uri('/')  # Get the base URL
+                        url = f"{base_url}restaurant/booking/tables/"  # Replace with the actual URL
+
+
+                        data = {
+                            "name": data['name'],
+                            "phone": data['phone'],
+                            "email": data['email'],
+                            "reservation_date": data['reservation_date'],
+                            "reservation_slot": data['reservation_slot'],
+                        }
+                        
+                        try:
+                            response = requests.post(url, data=json.dumps(data), headers={
+                                                     'Content-Type': 'multipart/form-data', 'Authorization': f'Token {request.user.auth_token}', 'Accept': 'application/json'})
+                            if response.status_code == 200:
+                                print("Booking created successfully!")
+                            else:
+                                JsonResponse("Failed to create booking. Status code:", response.status_code)
+                        except requests.exceptions.RequestException as e:
+                            print("Error:", e)
+                            return JsonResponse({'error': str(e)})
+                    else:
+                        print("Booking already exists!")
+                        return JsonResponse({'error': 1})
+                except Exception as e:
+                    print("Error: ", e)
+                    return JsonResponse({'error': str(e)})
             else:
-                return JsonResponse({'error': 1})
-        except Exception as e:
-            return JsonResponse({'error': str(e)})
+                print("User not authenticated!")
+                return redirect('/login')
 
+        def get(self, request):
+            print(request.body)
+            try:
+                date = request.GET.get('date', datetime.today().date())
+                bookings = Booking.objects.all().filter(reservation_date=date)
+                booking_json = serializers.serialize('json', bookings)
+
+                return JsonResponse(booking_json, content_type='application/json')
+            except Exception as e:
+               print(e)
+               return JsonResponse({'error': str(e)})
+
+class LoginView(View):
     def get(self, request):
-        try:
-            date = request.GET.get('date', datetime.today().date())
+        url = "/restaurant/accounts/login"  # Replace with the actual URL
+        response = requests.get(url)
+        print(request.path)
+        if response.status_code == 200:
+            render(request, 'book.html')
 
-            bookings = Booking.objects.all().filter(reservation_date=date)
-            booking_json = serializers.serialize('json', bookings)
+    def post(self, request):
+        pass
 
-            return JsonResponse(booking_json, content_type='application/json')
-        except Exception as e:
-            return JsonResponse({'error': str(e)})
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        return render(request, 'index.html')

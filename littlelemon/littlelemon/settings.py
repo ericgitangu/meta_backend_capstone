@@ -124,6 +124,8 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
+APPEND_SLASH = True
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DJOSER={"USER_ID_FIELD":"username"}

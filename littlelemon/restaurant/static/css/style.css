@@ -125,19 +125,21 @@ label {
   }
 
 input, select{
-    width: 80%;
-    display: block;
+    width:50%;
+    display: inline-flex;
+    flex-direction: row;
     padding: .5rem 1rem;
     line-height: 1.5rem;
     box-sizing: border-box;
 }
 
 #button {
+    margin-top: 20px;
     padding: .5rem 1rem;
     border: 1px solid #495E57;
     background-color:#495E57;;
     border-radius: 5px;
-    width: 80%;
+    width: 50%;
     font-size: 1.25rem;
     display: block;
     color: #fff;
@@ -262,3 +264,26 @@ footer p {
         width: 100%;
     }
   }
+
+.container {
+    margin: auto;
+    width: 100%;
+    padding: 10px;
+    
+}
+
+.submit {
+    padding: 10px 20px;
+    background-color: #495E57;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+}
+
+form {
+    margin: auto;
+    width: 100%;
+    padding: 10px;
+}

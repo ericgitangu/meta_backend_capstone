@@ -29,9 +29,11 @@ urlpatterns = [
     path('', include('restaurant.urls')),
     path('admin/', admin.site.urls),
     path('restaurant/', include(router.urls)),
-    path('accounts/', include('rest_framework.urls')),
+    path('restaurant/accounts/', include('rest_framework.urls')),
     path('accounts/profile/', views.ProfileView.as_view(), name='profile'),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
-    path('token/', obtain_auth_token)
+    path('token/', obtain_auth_token),
+    path('restaurant/accounts/signout/', views.LogoutView.as_view(), name='signout'),
+    path('restaurant/accounts/login/', views.LoginView.as_view(), name='login'),
 ]
