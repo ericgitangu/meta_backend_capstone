@@ -4,6 +4,9 @@ from django.contrib.auth.models import User
 
 @admin.register(Menu)
 class MenuAdmin(admin.ModelAdmin):
+    """
+    Admin class for managing the Menu model in the Django admin interface.
+    """
     search_fields = ['title', 'price']
     list_filter = ['price']
     list_per_page = 10
@@ -14,6 +17,11 @@ class MenuAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the Booking model.
+    
+    This class defines the display, search, and filtering options for the Booking model in the Django admin interface.
+    """
     search_fields = ['name', 'phone', 'email']
     list_filter = ['reservation_date', 'reservation_slot']
     list_per_page = 10

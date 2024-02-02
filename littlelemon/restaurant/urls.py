@@ -13,3 +13,12 @@ urlpatterns = [
     path('login/', views.LoginView.as_view(), name='login'),
     path('signout/', views.LogoutView.as_view(), name='signout'),
 ]
+
+"""
+URL patterns for the restaurant app.
+
+This module defines the URL patterns for the restaurant app. It includes paths for the home, about, book, reservations, menu, menu_item, login, and signout views.
+
+Author: Eric Gitangu
+Date: Feb, 1st 2024
+"""

@@ -1,21 +1,18 @@
-{% extends 'base.html' %}
-
-{% block content %}
-    <h1>User Profile</h1>
-    <p>Welcome, {{ profile.username }}!</p>
-    <p>Email: {{ profile.email }}</p>
-    <p>Joined: {{ profile.date_joined }}</p>
-    <p>Groups: {{ profile.groups.all|join:', ' }}</p>
-    <p>Permissions: {{ profile.user.user_permissions.all|join:', ' }}</p>
-    <p>Is Active: {{ profile.is_active }}</p>
-    <p>Is Staff: {{ profile.is_staff }}</p>
-    <p>Is Superuser: {{ profile.is_superuser }}</p>
-    <p>Last login: {{ profile.last_login }}</p>
-{% endblock %}
-
+{% extends 'base.html' %} {% block content %}
+<h1>User Profile</h1>
+<p>Welcome, {{ profile.username }}!</p>
+<p>Email: {{ profile.email }}</p>
+<p>Joined: {{ profile.date_joined }}</p>
+<p>Groups: {{ profile.groups.all|join:', ' }}</p>
+<p>Permissions: {{ profile.user.user_permissions.all|join:', ' }}</p>
+<p>Is Active: {{ profile.is_active }}</p>
+<p>Is Staff: {{ profile.is_staff }}</p>
+<p>Is Superuser: {{ profile.is_superuser }}</p>
+<p>Last login: {{ profile.last_login }}</p>
 <script>
-    setTimeout(function() {
-        alert("You have successfully logged in!");
-        window.location.href = {% url 'book' %};
-    }, 3000);
+	setTimeout(function() {
+	    alert("Welcome, {{profile.username}}! Redirecting you to our reservation page...");
+	    window.location.href = {% url 'book' %};
+	}, 3000);
 </script>
+{% endblock %}

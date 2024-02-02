@@ -37,6 +37,18 @@ from django.views.decorators.csrf import csrf_protect
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for managing user data.
+
+    This viewset provides CRUD operations for the User model.
+    It allows creating, reading, updating, and deleting user instances.
+
+    Attributes:
+        queryset (QuerySet): The queryset of User objects.
+        serializer_class (Serializer): The serializer class for User objects.
+        permission_classes (list): The list of permission classes for the viewset.
+        extra_actions (list): The list of extra actions supported by the viewset.
+    """
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
@@ -44,6 +56,18 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class MenuViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for handling CRUD operations on Menu objects.
+
+    Inherits from viewsets.ModelViewSet and provides default
+    implementations for list, create, retrieve, update, and destroy actions.
+
+    Attributes:
+        queryset (QuerySet): The queryset of Menu objects.
+        serializer_class (Serializer): The serializer class for Menu objects.
+        permission_classes (list): The list of permission classes for the viewset.
+        extra_actions (list): The list of extra actions supported by the viewset.
+    """
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -51,27 +75,70 @@ class MenuViewSet(viewsets.ModelViewSet):
 
 
 class BookingViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for handling CRUD operations on Booking objects.
+
+    Inherits from viewsets.ModelViewSet, which provides default implementations
+    for the standard list, create, retrieve, update, and destroy actions.
+
+    Attributes:
+        queryset (QuerySet): The queryset of Booking objects to be used by the viewset.
+        serializer_class (Serializer): The serializer class to be used for serializing and deserializing Booking objects.
+        extra_actions (list): A list of additional actions supported by the viewset.
+        permission_classes (list): A list of permission classes that the viewset requires for accessing its endpoints.
+    """
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     extra_actions = ['create', 'list', 'update', 'destroy']
     permission_classes = [permissions.IsAuthenticated]
-    
+
+
 class ProfileView(View):
+    """
+    View class for displaying user profile.
+
+    Requires the user to be logged in.
+    Retrieves the user's profile from the database and renders the 'profile.html' template.
+    """
+
     @method_decorator(login_required, name='dispatch')
     def get(self, request):
         user = request.user
         profile = User.objects.get(username=user.username)
-        return render(request, 'book.html')
+        return render(request, 'profile.html', {'profile': profile})
+
+
 class HomeView(View):
     def get(self, request):
+        """
+        Renders the index.html template.
+
+        Parameters:
+        - request: The HTTP request object.
+
+        Returns:
+        - The rendered index.html template.
+        """
         return render(request, 'index.html')
 
 
 class AboutView(TemplateView):
+    """
+    A view that renders the about page.
+
+    Inherits from TemplateView and uses the 'about.html' template.
+    """
     template_name = 'about.html'
 
 
 class ReservationsView(View):
+    """
+    A view for handling reservations.
+
+    Methods:
+    - get: Retrieves the reservations for a specific date and renders them in a template.
+    """
+
     def get(self, request):
         date = request.GET.get('date', datetime.today().date())
         bookings = Booking.objects.all()
@@ -80,6 +147,16 @@ class ReservationsView(View):
 
 
 class BookView(View):
+    """
+    View class for handling booking requests.
+
+    Methods:
+    - get: Handles GET requests for booking. If the user is authenticated, it renders the booking form.
+            If the user is not authenticated, it redirects to the login page.
+    - post: Handles POST requests for booking. If the user is authenticated and the form is valid,
+            it saves the booking and renders the booking form. If the user is not authenticated,
+            it renders the login page.
+    """
     def get(self, request):
         if request.user.is_authenticated:
             form = BookingForm()
@@ -87,7 +164,8 @@ class BookView(View):
             return render(request, 'book.html', context)
         else:
             base_url = request.build_absolute_uri('/')  # Get the base URL
-            login_url = f"{base_url}restaurant/accounts/login"  # Construct the login URL
+            # Construct the login URL
+            login_url = f"{base_url}restaurant/accounts/login"
             return redirect(login_url)  # Redirect to the login URL
 
     def post(self, request):
@@ -102,6 +180,13 @@ class BookView(View):
 
 
 class MenuView(View):
+    """
+    A view class that handles the rendering of the menu page.
+
+    Methods:
+    - get: Handles the GET request and renders the menu.html template with the menu data.
+    """
+
     def get(self, request):
         menu_data = Menu.objects.all()
         main_data = {"menu": menu_data}
@@ -109,7 +194,25 @@ class MenuView(View):
 
 
 class MenuItemView(View):
+    """
+    A view class for handling requests related to menu items.
+
+    Methods:
+    - get(request, pk=None): Handles GET requests for retrieving a specific menu item or all menu items.
+    """
+
     def get(self, request, pk=None):
+        """
+        Handles GET requests for retrieving a specific menu item or all menu items.
+
+        Args:
+        - request: The HTTP request object.
+        - pk (optional): The primary key of the menu item to retrieve.
+
+        Returns:
+        - If pk is provided, returns the menu item with the specified primary key.
+        - If pk is not provided, returns all menu items.
+        """
         if pk:
             menu_item = Menu.objects.get(pk=pk)
         else:
@@ -118,69 +221,76 @@ class MenuItemView(View):
 
 
 class BookingsView(View):
-    class BookingsView(View):
-        @csrf_protect
-        def post(self, request):
-            if request.user.is_authenticated:
-                print('User is authenticated!')
-                try:
-                    data = json.loads(request.body)
-                    exist = Booking.objects.filter(reservation_date=data['reservation_date']).filter(
-                        reservation_slot=data['reservation_slot']).exists()
-                    if not exist:
-                        # booking = Booking(
-                        #     name=data['name'],
-                        #     phone=data['phone'],
-                        #     email=data['email'],
-                        #     reservation_date=data['reservation_date'],
-                        #     reservation_slot=data['reservation_slot'],
-                            
-                        # )
-                        # # booking.save()
-                        
-                        base_url = request.build_absolute_uri('/')  # Get the base URL
-                        url = f"{base_url}restaurant/booking/tables/"  # Replace with the actual URL
+    '''
+        This class handles the creation of bookings.
+        The booking endpoint is being used in lieu of this module.
+    '''
+    pass
+    # @csrf_protect
+    # def post(self, request):
+    #     if request.user.is_authenticated:
+    #         print('User is authenticated!')
+    #         try:
+    #             data = json.loads(request.body)
+    #             exist = Booking.objects.filter(reservation_date=data['reservation_date']).filter(
+    #                 reservation_slot=data['reservation_slot']).exists()
+    #             if not exist:
+    #                 # booking = Booking(
+    #                 #     name=data['name'],
+    #                 #     phone=data['phone'],
+    #                 #     email=data['email'],
+    #                 #     reservation_date=data['reservation_date'],
+    #                 #     reservation_slot=data['reservation_slot'],
 
+    #                 # )
+    #                 # # booking.save()
 
-                        data = {
-                            "name": data['name'],
-                            "phone": data['phone'],
-                            "email": data['email'],
-                            "reservation_date": data['reservation_date'],
-                            "reservation_slot": data['reservation_slot'],
-                        }
-                        
-                        try:
-                            response = requests.post(url, data=json.dumps(data), headers={
-                                                     'Content-Type': 'multipart/form-data', 'Authorization': f'Token {request.user.auth_token}', 'Accept': 'application/json'})
-                            if response.status_code == 200:
-                                print("Booking created successfully!")
-                            else:
-                                JsonResponse("Failed to create booking. Status code:", response.status_code)
-                        except requests.exceptions.RequestException as e:
-                            print("Error:", e)
-                            return JsonResponse({'error': str(e)})
-                    else:
-                        print("Booking already exists!")
-                        return JsonResponse({'error': 1})
-                except Exception as e:
-                    print("Error: ", e)
-                    return JsonResponse({'error': str(e)})
-            else:
-                print("User not authenticated!")
-                return redirect('/login')
+    #                 base_url = request.build_absolute_uri(
+    #                     '/')  # Get the base URL
+    #                 # Replace with the actual URL
+    #                 url = f"{base_url}restaurant/booking/tables/"
 
-        def get(self, request):
-            print(request.body)
-            try:
-                date = request.GET.get('date', datetime.today().date())
-                bookings = Booking.objects.all().filter(reservation_date=date)
-                booking_json = serializers.serialize('json', bookings)
+    #                 data = {
+    #                     "name": data['name'],
+    #                     "phone": data['phone'],
+    #                     "email": data['email'],
+    #                     "reservation_date": data['reservation_date'],
+    #                     "reservation_slot": data['reservation_slot'],
+    #                 }
 
-                return JsonResponse(booking_json, content_type='application/json')
-            except Exception as e:
-               print(e)
-               return JsonResponse({'error': str(e)})
+    #                 try:
+    #                     response = requests.post(url, data=json.dumps(data), headers={
+    #                                              'Content-Type': 'multipart/form-data', 'Authorization': f'Token {request.user.auth_token}', 'Accept': 'application/json'})
+    #                     if response.status_code == 200:
+    #                         print("Booking created successfully!")
+    #                     else:
+    #                         JsonResponse(
+    #                             "Failed to create booking. Status code:", response.status_code)
+    #                 except requests.exceptions.RequestException as e:
+    #                     print("Error:", e)
+    #                     return JsonResponse({'error': str(e)})
+    #             else:
+    #                 print("Booking already exists!")
+    #                 return JsonResponse({'error': 1})
+    #         except Exception as e:
+    #             print("Error: ", e)
+    #             return JsonResponse({'error': str(e)})
+    #         else:
+    #             print("User not authenticated!")
+    #             return redirect('/login')
+
+    #     def get(self, request):
+    #         print(request.body)
+    #         try:
+    #             date = request.GET.get('date', datetime.today().date())
+    #             bookings = Booking.objects.all().filter(reservation_date=date)
+    #             booking_json = serializers.serialize('json', bookings)
+
+    #             return JsonResponse(booking_json, content_type='application/json')
+    #         except Exception as e:
+    #            print(e)
+    #            return JsonResponse({'error': str(e)})
+
 
 class LoginView(View):
     def get(self, request):
@@ -192,6 +302,7 @@ class LoginView(View):
 
     def post(self, request):
         pass
+
 
 class LogoutView(View):
     def get(self, request):
