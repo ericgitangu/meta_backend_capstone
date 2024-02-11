@@ -1,4 +1,4 @@
-# Backend Capstone - - META Capstone Project for the Backend Specialization
+# Backend Capstone - META Certification Capstone Project for the Backend Specialization
 
 ## Project objectives
 
