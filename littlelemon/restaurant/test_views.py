@@ -86,10 +86,7 @@ class MenuViewTest(TestCase):
 
         print("\n---- 1. Testing the *getall* endpoint----")
         url = reverse('menu-list')
-        bearer_token = requests.post('http://127.0.0.1:8000/auth/token/login', data={
-                                     'username': 'bistroadmin', 'password': 'lemon@786!'}).json()['auth_token']
         headers = {
-            'Authorization': f'Bearer {bearer_token}',
             'Content-Type': 'application/json'
         }
         response = self.client.get(url, headers=headers)
