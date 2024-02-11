@@ -157,6 +157,54 @@ This repository contains the backend code for the capstone project.
 - `test_update_reservation`: Tests updating a reservation in the Booking Model.
 - `test_delete_reservation`: Tests deleting a reservation from the Booking Model.
 
+### MenuViewTest
+
+Test case for the MenuView class.
+
+This test case includes setup and teardown methods, as well as a test method for the `getall` endpoint.
+
+#### create_bearer_token(username, password)
+
+Creates a bearer token for the given username and password.
+
+##### Args
+
+- `username` (str): The username.
+- `password` (str): The password.
+
+##### Returns
+
+- `str`: The bearer token key.
+
+#### setUp()
+
+Set up the test environment for the getall endpoint.
+
+This method is called before each test case to initialize the necessary objects and variables.
+It creates three Menu objects with different titles, prices, and inventories.
+
+#### tearDown()
+
+This method is called after each test case to clean up any resources used during the test.
+It deletes all Menu objects from the database and prints a message indicating the completion of teardown.
+
+#### test_getall()
+
+Test case for the `getall` endpoint.
+
+This test case verifies the behavior of the `getall` endpoint by making a GET request to the endpoint
+and asserting the response status code and data against the expected values.
+
+Steps:
+
+1. Generate a bearer token by making a POST request to the login endpoint (not necessary AllowAny permissions just stretching my knowledge).
+2. Set the authorization header with the bearer token. (if this needed a bearer token this would be necessary and that's why I took the time to implement this but the menu endpoint doesn't need auth)
+3. Make a GET request to the `menu-list` endpoint.
+4. Retrieve all the Menu objects from the database.
+5. Serialize the Menu objects.
+6. Assert the response status code is 200.
+7. Assert the response data matches the serialized data.
+
 ## Project
 
 - littlelemon
