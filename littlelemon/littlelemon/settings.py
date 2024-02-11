@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'restaurant.apps.RestaurantConfig',
     'rest_framework',
     'rest_framework.authtoken',
-    'djoser'
+    'djoser',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -136,7 +137,40 @@ APPEND_SLASH = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DJOSER={"USER_ID_FIELD":"username"}
+DJOSER = {
+    'USER_ID_FIELD': 'username',
+    'LOGIN_FIELD': 'username',
+    'USER_CREATE_PASSWORD_RETYPE': False,
+    'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
+    'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
+    'SEND_CONFIRMATION_EMAIL': True,
+    'SET_USERNAME_RETYPE': True,
+    'SET_PASSWORD_RETYPE': True,
+    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': 'email/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': 'activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
+    'SERIALIZERS': {
+        'user_create': 'djoser.serializers.UserCreateSerializer',
+        'user': 'djoser.serializers.UserCreateSerializer',
+        'user_delete': 'djoser.serializers.UserDeleteSerializer',
+        'user_update': 'djoser.serializers.UserUpdateSerializer',
+        'user_list': 'djoser.serializers.UserListSerializer',
+        'set_password': 'djoser.serializers.SetPasswordSerializer',
+        'password_reset': 'djoser.serializers.PasswordResetSerializer',
+        'password_reset_confirm': 'djoser.serializers.PasswordResetConfirmSerializer',
+        'username_reset': 'djoser.serializers.UsernameResetSerializer',
+        'username_reset_confirm': 'djoser.serializers.UsernameResetConfirmSerializer',
+        'activation': 'djoser.serializers.ActivationSerializer',
+        'resend_activation': 'djoser.serializers.ResendActivationSerializer',
+        'password_reset': 'djoser.serializers.PasswordResetSerializer',
+        'password_reset_confirm': 'djoser.serializers.PasswordResetConfirmSerializer',
+        'set_username': 'djoser.serializers.SetUsernameSerializer',
+        'login': 'djoser.serializers.LoginSerializer',
+        'token': 'djoser.serializers.TokenSerializer',
+        'logout': 'djoser.serializers.LogoutSerializer',
+    },
+}
 
 DEFAULT_AUTHENTICATION_CLASSES = [
     'rest_framework.authentication.TokenAuthentication',
@@ -145,14 +179,30 @@ DEFAULT_AUTHENTICATION_CLASSES = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_FITLER_BACKENDS': [
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.DjangoFilterBackend',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 5,  # Number of items per page
+
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/min',
+        'user': '20/min',
+    },
 }

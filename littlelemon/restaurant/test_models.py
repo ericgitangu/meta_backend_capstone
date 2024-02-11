@@ -7,7 +7,7 @@ class MenuModelTest(TestCase):
     def setUpTestData(cls):
         print("\n\n---- 2. Test Setup Menu Model----")
         Menu.objects.create(
-            title='Burger',
+            name='Burger',
             inventory=10,
             price=9.99,
             description='Delicious burger'
@@ -16,30 +16,30 @@ class MenuModelTest(TestCase):
 
     def test_get_item(self):
         print("\n---- 2. Testing get_item method (Menu Model)----")
-        menu = Menu.objects.get(title='Burger')
+        menu = Menu.objects.get(name='Burger')
         expected_item = 'Burger : 9.99'
         self.assertEqual(str(menu), expected_item)
         print('\tPassed get_item method ✅')
 
     def test_get_all_items(self):
         print("\n---- 2. Testing get_all_items method (Menu Model)----")
-        menu1 = Menu.objects.create(title='Pizza', inventory=5, price=12.99)
-        menu2 = Menu.objects.create(title='Salad', inventory=8, price=7.99)
-        menu3 = Menu.objects.create(title='Pasta', inventory=3, price=10.99)
+        menu1 = Menu.objects.create(name='Pizza', inventory=5, price=12.99)
+        menu2 = Menu.objects.create(name='Salad', inventory=8, price=7.99)
+        menu3 = Menu.objects.create(name='Pasta', inventory=3, price=10.99)
 
         expected_items = ['Burger', 'Pasta', 'Pizza', 'Salad']
-        actual_items = sorted(Menu.objects.values_list('title', flat=True))
+        actual_items = sorted(Menu.objects.values_list('name', flat=True))
         self.assertEqual(actual_items, expected_items)
         print('\tPassed get_all_items method ✅')
 
     def test_ordering(self):
         print("\n---- 2. Testing menu items ordering (Menu Model)----")
-        menu1 = Menu.objects.create(title='Pizza', inventory=5, price=12.99)
-        menu2 = Menu.objects.create(title='Salad', inventory=8, price=7.99)
-        menu3 = Menu.objects.create(title='Pasta', inventory=3, price=10.99)
+        menu1 = Menu.objects.create(name='Pizza', inventory=5, price=12.99)
+        menu2 = Menu.objects.create(name='Salad', inventory=8, price=7.99)
+        menu3 = Menu.objects.create(name='Pasta', inventory=3, price=10.99)
 
         expected_ordering = ['Burger', 'Pasta', 'Pizza', 'Salad']
-        actual_ordering = list(Menu.objects.values_list('title', flat=True))
+        actual_ordering = list(Menu.objects.values_list('name', flat=True))
         self.assertEqual(actual_ordering, expected_ordering)
         print('\tPassed menu items ordering ✅')
     
@@ -50,71 +50,71 @@ class MenuModelTest(TestCase):
     
     def test_string_representation(self):
         print("\n---- 2. Testing string representation (Menu Model)----")
-        menu = Menu.objects.get(title='Burger')
+        menu = Menu.objects.get(name='Burger')
         self.assertEqual(str(menu), 'Burger : 9.99')
         print('\tPassed string representation ✅')
     
     def test_title_max_length(self):
-        print("\n---- 2. Testing title max length (Menu Model)----")
-        menu = Menu.objects.get(title='Burger')
-        max_length = menu._meta.get_field('title').max_length
+        print("\n---- 2. Testing name max length (Menu Model)----")
+        menu = Menu.objects.get(name='Burger')
+        max_length = menu._meta.get_field('name').max_length
         self.assertEqual(max_length, 255)
-        print('\tPassed title max length ✅')
+        print('\tPassed name max length ✅')
     
     def test_inventory_default(self):
         print("\n---- 2. Testing inventory default value (Menu Model)----")
-        menu = Menu.objects.get(title='Burger')
+        menu = Menu.objects.get(name='Burger')
         self.assertEqual(menu.inventory, 10)
         print('\tPassed inventory default value ✅')
 
     def test_price_max_digits(self):
         print("\n---- 2. Testing price max digits (Menu Model)----")
-        menu = Menu.objects.get(title='Burger')
+        menu = Menu.objects.get(name='Burger')
         max_digits = menu._meta.get_field('price').max_digits
         self.assertEqual(max_digits, 5)
         print('\tPassed price max digits ✅')
     
     def test_price_decimal_places(self):
         print("\n---- 2. Testing price decimal places (Menu Model)----")
-        menu = Menu.objects.get(title='Burger')
+        menu = Menu.objects.get(name='Burger')
         decimal_places = menu._meta.get_field('price').decimal_places
         self.assertEqual(decimal_places, 2)
         print('\tPassed price decimal places ✅')
     
     def test_description_null(self):
         print("\n---- 2. Testing description null (Menu Model)----")
-        menu = Menu.objects.get(title='Burger')
+        menu = Menu.objects.get(name='Burger')
         self.assertEqual(menu.description, 'Delicious burger')
         print('\tPassed description null ✅')
 
     def test_description_blank(self):
         print("\n---- 2. Testing description blank (Menu Model)----")
-        menu = Menu.objects.get(title='Burger')
+        menu = Menu.objects.get(name='Burger')
         self.assertEqual(menu.description, 'Delicious burger')
         print('\tPassed description blank ✅')
     
     def test_description_max_length(self):
         print("\n---- 2. Testing description max length (Menu Model)----")
-        menu = Menu.objects.get(title='Burger')
+        menu = Menu.objects.get(name='Burger')
         max_length = menu._meta.get_field('description').max_length
         self.assertIsNone(max_length)
         print('\tPassed description max length ✅')
     
     def test_update_menu_item(self):
         print("\n---- 2. Testing update menu item (Menu Model)----")
-        menu = Menu.objects.get(title='Burger')
-        menu.title = 'Cheeseburger'
+        menu = Menu.objects.get(name='Burger')
+        menu.name = 'Cheeseburger'
         menu.price = 10.99
         menu.save()
 
         updated_menu = Menu.objects.get(id=menu.id)
-        self.assertEqual(updated_menu.title, 'Cheeseburger')
+        self.assertEqual(updated_menu.name, 'Cheeseburger')
         self.assertEqual(str(updated_menu.price), '10.99')
         print('\tPassed update menu item ✅')
     
     def test_delete_menu_item(self):
         print("\n---- 2. Testing delete menu item (Menu Model)----")
-        menu = Menu.objects.get(title='Burger')
+        menu = Menu.objects.get(name='Burger')
         menu.delete()
         self.assertEqual(Menu.objects.count(), 0)
         print('\tPassed delete menu item ✅')

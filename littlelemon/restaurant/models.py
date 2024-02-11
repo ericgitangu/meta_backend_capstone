@@ -29,7 +29,7 @@ class Menu(models.Model):
     Represents a menu item in the restaurant.
 
     Attributes:
-        title (str): The title of the menu item.
+        name (str): The name of the menu item.
         inventory (int): The number of items available in the inventory.
         price (Decimal): The price of the menu item.
         description (str): The description of the menu item (optional).
@@ -43,17 +43,17 @@ class Menu(models.Model):
 
     """
 
-    title = models.CharField(max_length=255, null=False, blank=False, default='')
+    name = models.CharField(max_length=255, null=False, blank=False, default='')
     inventory = models.SmallIntegerField(default=0)
     price = models.DecimalField(max_digits=5, decimal_places=2)
     description = models.TextField(null=True, blank=True)
 
     class Meta:
-        ordering = ['title', 'inventory', 'price']
+        ordering = ['name', 'inventory', 'price']
         verbose_name_plural = 'Menu'
 
     def __str__(self):
-        return str(self.title) + ' : ' + str(self.price)
+        return str(self.name) + ' : ' + str(self.price)
 
 class Booking(models.Model):
     """

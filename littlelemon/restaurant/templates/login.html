@@ -12,31 +12,53 @@
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" class="form-control" required>
     </div><br/>
-    <div class="form-group">
+    {% comment %} <div class="form-group">
         <label for="email">Email:</label>
-        <input type="email" id="email" name="email" class="form-control" required ><br/>
+        <input type="email" id="email" name="email" class="form-control" required ><br/> {% endcomment %}
     <div class="form-group">
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" class="form-control" required>
     </div><br/>
-    <button type="submit" class="submit">Login</button>
+    <button type="submit" class="submit">Login</button><br/>
+    <button type="button" class="submit"><a href="/auth/users/">Register</a></button><br/>
+    <button type="button" class="submit"><a href="auth/users/password_reset">Forgot Password?</a></button><br/>
 </form>
 <script>
 document.querySelector('form').addEventListener('submit', function(event) {
     event.preventDefault();
     let username = document.getElementById('username').value;
     let password = document.getElementById('password').value;
-    let email = document.getElementById('email').value;
-
-    fetch('http://localhost:8000/auth/users/', {
+    let bearer_token = ""
+    data = {
+            'username': username,
+            'password': password,
+    }
+    fetch('/auth/token/login/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
+        body: JSON.stringify(data)
+    }).then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+        bearer_token = data.access;
+        console.log(bearer_token);
+    })    
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+    {% comment %} let email = document.getElementById('email').value; {% endcomment %}
+
+    fetch('/api/accounts/login/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${bearer_token}`,
+        },
         body: JSON.stringify({
             username: username,
             password: password,
-            email: email
         })
     })
     .then(response => response.json())
@@ -44,6 +66,7 @@ document.querySelector('form').addEventListener('submit', function(event) {
         // Create user using the user model and save the user
         let user = new User(username, password, email);
         user.save();
+        console.log('Success:', data);
     })
     .catch(error => {
         console.error('Error:', error);
@@ -53,3 +76,10 @@ document.querySelector('form').addEventListener('submit', function(event) {
 </div>
 <!--End col-->
 {% endblock %}
+
+
+
+
+{% comment %} Login: /api/accounts/login/
+Register: /auth/users/
+Reset: /auth/users/password_reset/ {% endcomment %}

@@ -7,13 +7,13 @@ class MenuAdmin(admin.ModelAdmin):
     """
     Admin class for managing the Menu model in the Django admin interface.
     """
-    search_fields = ['title', 'price']
+    search_fields = ['name', 'price']
     list_filter = ['price']
     list_per_page = 10
-    list_display = ['title', 'inventory', 'price']
+    list_display = ['name', 'inventory', 'price']
     list_editable = ['price']
-    list_display_links = ['title', 'inventory']
-    ordering = ['title', 'inventory']
+    list_display_links = ['name', 'inventory']
+    ordering = ['name', 'inventory']
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):

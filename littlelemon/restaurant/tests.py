@@ -51,11 +51,11 @@ class MenuViewTest(TestCase):
             print("\n---- 1. Test Setup for the getall endpoint----")
             self.client = APIClient()
             self.menu1 = Menu.objects.create(
-                title='Menu 1', price=10.99, inventory=10)
+                name='Menu 1', price=10.99, inventory=10)
             self.menu2 = Menu.objects.create(
-                title='Menu 2', price=15.99, inventory=20)
+                name='Menu 2', price=15.99, inventory=20)
             self.menu3 = Menu.objects.create(
-                title='Menu 3', price=12.99, inventory=30)
+                name='Menu 3', price=12.99, inventory=30)
             print('\tSetup complete ✅')
 
     def tearDown(self):

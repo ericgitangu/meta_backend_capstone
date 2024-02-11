@@ -24,20 +24,18 @@ from restaurant import views
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
-router.register(r'booking/tables', views.BookingViewSet)
-router.register(r'menu', views.MenuViewSet)
-router.register(r'booking/tables', views.BookingViewSet)
+router.register(r'bookings', views.BookingViewSet)
 router.register(r'menu', views.MenuViewSet)
 
 urlpatterns = [
     path('', include('restaurant.urls')),
     path('admin/', admin.site.urls),
-    path('restaurant/', include(router.urls)),
-    path('restaurant/accounts/', include('rest_framework.urls')),
+    path('api/', include(router.urls)),
+    path('api/accounts/', include('rest_framework.urls')),
     path('accounts/profile/', views.ProfileView.as_view(), name='profile'),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
     path('token/', obtain_auth_token),
-    path('restaurant/accounts/signout/', views.LogoutView.as_view(), name='signout'),
-    path('restaurant/accounts/login/', views.LoginView.as_view(), name='login'),
+    path('api/accounts/signout/', views.LogoutView.as_view(), name='signout'),
+    path('api/accounts/login/', views.LoginView.as_view(), name='login'),
 ]

@@ -7,7 +7,7 @@
     {% for item in menu.menu %}
     <p>
         <a href="{% url 'menu_item' pk=item.pk %}">
-            {{ item.title }}
+            {{ item.name }}
             </a>
         <span class="menu-price">
             ${{ item.price }}

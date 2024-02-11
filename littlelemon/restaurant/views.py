@@ -26,7 +26,6 @@ from django.http import JsonResponse, HttpResponse
 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.http import JsonResponse
 from django.shortcuts import redirect
 import requests
 from django.contrib.auth import logout
@@ -34,6 +33,8 @@ import requests
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_protect
+from rest_framework import filters, pagination
+from rest_framework.pagination import PageNumberPagination
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -53,26 +54,41 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
     extra_actions = ['create']
-
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    filterset_fields = ['category', 'price']
+    search_fields = ['name', 'description']
+    ordering_fields = ['name', 'price']
+    # pagination_class = pagination.PageNumberPagination,
+    paginate_by = 10
 
 class MenuViewSet(viewsets.ModelViewSet):
     """
-    A viewset for handling CRUD operations on Menu objects.
+        A viewset for handling CRUD operations on Menu objects.
 
-    Inherits from viewsets.ModelViewSet and provides default
-    implementations for list, create, retrieve, update, and destroy actions.
+        Inherits from viewsets.ModelViewSet and provides default
+        implementations for list, create, retrieve, update, and destroy actions.
 
-    Attributes:
-        queryset (QuerySet): The queryset of Menu objects.
-        serializer_class (Serializer): The serializer class for Menu objects.
-        permission_classes (list): The list of permission classes for the viewset.
-        extra_actions (list): The list of extra actions supported by the viewset.
-    """
+        Attributes:
+            queryset (QuerySet): The queryset of Menu objects.
+            serializer_class (Serializer): The serializer class for Menu objects.
+            permission_classes (list): The list of permission classes for the viewset.
+            extra_actions (list): The list of extra actions supported by the viewset.
+            filter_backends (list): The list of filter backends for the viewset.
+            filterset_fields (list): The list of fields to filter on.
+            search_fields (list): The list of fields to search on.
+            ordering_fields (list): The list of fields to order on.
+            pagination_class (Pagination): The pagination class for the viewset.
+        """
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     extra_actions = ['list']
-
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    filterset_fields = ['category', 'price']
+    search_fields = ['name', 'description']
+    ordering_fields = ['name', 'price']
+    # pagination_class = pagination.PageNumberPagination,
+    paginate_by = 2
 
 class BookingViewSet(viewsets.ModelViewSet):
     """
@@ -91,6 +107,12 @@ class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     extra_actions = ['create', 'list', 'update', 'destroy']
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    filterset_fields = ['category', 'price']
+    search_fields = ['name', 'description']
+    ordering_fields = ['name', 'price']
+    # pagination_class = pagination.PageNumberPagination,
+    paginate_by = 10
 
 
 class ProfileView(View):
@@ -119,6 +141,7 @@ class HomeView(View):
         Returns:
         - The rendered index.html template.
         """
+        
         return render(request, 'index.html')
 
 
@@ -141,9 +164,36 @@ class ReservationsView(View):
 
     def get(self, request):
         date = request.GET.get('date', datetime.today().date())
-        bookings = Booking.objects.all()
+        bookings = BookingViewSet().get_queryset()
         booking_json = serializers.serialize('json', bookings)
         return render(request, 'bookings.html', {"bookings": booking_json})
+    
+class ReservationsItemView(View):
+    """
+    A view class for handling requests related to reservations.
+
+    Methods:
+    - get(request, pk=None): Handles GET requests for retrieving a specific reservation or all reservations.
+    """
+    def get(self, request, pk=None):
+        """
+        Handles GET requests for retrieving a specific reservation or all reservations.
+
+        Args:
+        - request: The HTTP request object.
+        - pk (optional): The primary key of the reservation to retrieve.
+
+        Returns:
+        - If pk is provided, returns the reservation with the specified primary key.
+        - If pk is not provided, returns all reservations.
+        """
+        bookings = BookingViewSet().get_queryset()
+        if pk is not None:
+            booking = bookings.get(pk=pk)
+        else:
+            booking = bookings.all()
+
+        return render(request, 'booking_item.html', {"booking": booking})
 
 
 class BookView(View):
@@ -177,6 +227,34 @@ class BookView(View):
             return render(request, 'book.html', context)
         else:
             return render(request=request, template_name='login.html')
+        
+class BookingItemView(View):
+    """
+    A view class for handling requests related to bookings.
+
+    Methods:
+    - get(request, pk=None): Handles GET requests for retrieving a specific booking or all bookings.
+    """
+
+    def get(self, request, pk=None):
+        """
+        Handles GET requests for retrieving a specific booking or all bookings.
+
+        Args:
+        - request: The HTTP request object.
+        - pk (optional): The primary key of the booking to retrieve.
+
+        Returns:
+        - If pk is provided, returns the booking with the specified primary key.
+        - If pk is not provided, returns all bookings.
+        """
+        bookings = BookingViewSet().get_queryset()
+        if pk:
+            booking = bookings.get(pk=pk)
+        else:
+            booking = bookings.all()
+
+        return render(request, 'booking_item.html', {"booking": booking})
 
 
 class MenuView(View):
@@ -188,7 +266,7 @@ class MenuView(View):
     """
 
     def get(self, request):
-        menu_data = Menu.objects.all()
+        menu_data = MenuViewSet().queryset.all()
         main_data = {"menu": menu_data}
         return render(request, 'menu.html', {"menu": main_data})
 
@@ -213,10 +291,12 @@ class MenuItemView(View):
         - If pk is provided, returns the menu item with the specified primary key.
         - If pk is not provided, returns all menu items.
         """
+        menu = MenuViewSet().get_queryset()
         if pk:
-            menu_item = Menu.objects.get(pk=pk)
+            menu_item = menu.get(pk=pk)
         else:
-            menu_item = ""
+            menu_item = menu.all()
+
         return render(request, 'menu_item.html', {"menu_item": menu_item})
 
 
